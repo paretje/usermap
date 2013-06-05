@@ -2,19 +2,23 @@
 /***************************************************************************
  *
  *   Usermap-system for MyBB
- *   Copyright: © 2008-2010 Online - Urbanus
+ *   Copyright: © 2008-2013 Online - Urbanus
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 15/04/2010 by Paretje
+ *   Last modified: 05/06/2013 by Paretje
  *
  ***************************************************************************/
 
 /***************************************************************************
  *
- *   This program is based on the GPLed mod called "skunkmap" version 1.1, made by King Butter - NCAAbbs SkunkWorks Team <http://www.ncaabbs.com>, which was released on the MyBB Mods site on 22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
+ *   This program is based on the GPLed mod called "skunkmap" version 1.1,
+ *   made by King Butter - NCAAbbs SkunkWorks Team
+ *   <http://www.ncaabbs.com>, which was released on the MyBB Mods site on
+ *   22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
  * 
- * So, I call my special thanks to the maker(s) of that program!
+ *   So, this way, I wish to credit the original developer for their
+ *   indirect contribution to this work.
  *
  ***************************************************************************/
 
@@ -40,89 +44,20 @@ define("IN_MYBB", 1);
 
 require_once "./global.php";
 
-//Updated template
-$new_templates['usermap_pin'] = "<html>
-<head>
-<title>{\$mybb->settings[\'bbname\']} - {\$lang->usermap}</title>
-{\$headerinclude}
-<script type=\"text/javascript\" src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key={\$mybb->settings[\'usermap_apikey\']}\"></script>
-{\$usermap_pinimgs_swapimg}
-{\$usermap_pinimgs_java}
-{\$usermap_pins}
-{\$usermap_places_java}
-<script type=\"text/javascript\">
-function initialize()
+// Updated templates
+// TODO: add them
+
+// Update the new template into the database
+foreach($new_templates as $title => $template)
 {
-	var map = new GMap2(document.getElementById(\"map\"));
-	map.setCenter(new GLatLng({\$coordinates}), 14);
-	map.setUIToDefault();
-	setPins(map);
+	$template_update = array(
+		"template"	=> $db->escape_string($template),
+		'version'	=> $db->escape_string($mybb->version_code),
+		'dateline'	=> TIME_NOW
+	);
+	$db->update_query("templates", $template_update, "title='" +
+		$db->escape_string($title) + "' AND sid='-1'");
 }
-</script>
-</head>
-<body  onload=\"initialize()\" onunload=\"GUnload()\">
-{\$header}
-<table border=\"0\" cellspacing=\"{\$theme[\'borderwidth\']}\" cellpadding=\"{\$theme[\'tablespace\']}\" class=\"tborder\">
-<tr>
-<td colspan=\"2\" class=\"thead\"><strong>{\$lang->usermap}</strong></td>
-</tr>
-<form method=\"post\" action=\"usermap.php\">
-<input type=\"hidden\" name=\"action\" value=\"lookup\" />
-<tr>
-<td class=\"trow1\" width=\"40%\">
-<strong>{\$lang->yourpin}</strong>
-</td>
-<td class=\"trow1\">
-<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->input[\'adress\']}\" />
-</td>
-</tr>
-<tr>
-<td class=\"trow2\" width=\"40%\">
-<strong>{\$lang->yourpinimg}</strong>
-</td>
-<td class=\"trow2\">
-<select name=\"pinimg\" onchange=\"swapIMG(this.value)\">
-{\$usermap_pinimgs_bit}
-</select>
-<img name=\"pin_image\" src=\"images/pinimgs/{\$mybb->input[\'pinimg\']}\">
-</td>
-</tr>
-<tr>
-<td colspan=\"2\" class=\"trow1\">
-<center><input type=\"submit\" class=\"submit\" value=\"{\$lang->lookup}\"></center>
-</td>
-</tr>
-</form>
-<tr>
-<td colspan=\"2\" class=\"trow2\">
-<form method=\"post\" action=\"usermap.php\">
-<input type=\"hidden\" name=\"action\" value=\"do_pin\" />
-<input type=\"hidden\" name=\"lat\" value=\"{\$users[\'usermap_lat\']}\" />
-<input type=\"hidden\" name=\"lon\" value=\"{\$users[\'usermap_lon\']}\" />
-<input type=\"hidden\" name=\"pinimg\" value=\"{\$mybb->input[\'pinimg\']}\" />
-<input type=\"hidden\" name=\"adress\" value=\"{\$mybb->input[\'adress\']}\" />
-<center><input type=\"submit\" class=\"submit\" value=\"{\$lang->ok}\"></center>
-</form>
-</td>
-</tr>
-<tr>
-<td colspan=\"2\" class=\"trow1\">
-<center><div id=\"map\" style=\"width: {\$mybb->settings[\'usermap_width\']}px; height: {\$mybb->settings[\'usermap_height\']}px\"></div></center>
-</td>
-</tr>
-</table>
-{\$footer}
-</body>
-</html>";
-
-//Update the new template into the database.
-$template_update = array(
-	"template"	=> $new_templates['usermap_pin'],
-	'version'	=> "1412",
-	'dateline'	=> TIME_NOW
-);
-
-$db->update_query("templates", $template_update, "title='usermap_pin' AND sid='-1'");
 
 echo "Your Usermap version is succesfully upgraded!";
 ?>

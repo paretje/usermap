@@ -2,19 +2,23 @@
 /***************************************************************************
  *
  *   Usermap-system for MyBB
- *   Copyright: © 2008-2010 Online - Urbanus
+ *   Copyright: © 2008-2013 Online - Urbanus
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 15/04/2010 by Paretje
+ *   Last modified: 05/06/2013 by Paretje
  *
  ***************************************************************************/
 
 /***************************************************************************
  *
- *   This program is based on the GPLed mod called "skunkmap" version 1.1, made by King Butter - NCAAbbs SkunkWorks Team <http://www.ncaabbs.com>, which was released on the MyBB Mods site on 22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
+ *   This program is based on the GPLed mod called "skunkmap" version 1.1,
+ *   made by King Butter - NCAAbbs SkunkWorks Team
+ *   <http://www.ncaabbs.com>, which was released on the MyBB Mods site on
+ *   22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
  * 
- * So, I call my special thanks to the maker(s) of that program!
+ *   So, this way, I wish to credit the original developer for their
+ *   indirect contribution to this work.
  *
  ***************************************************************************/
 
@@ -55,20 +59,20 @@ function usermap_info()
 {
 	return array(
 		"name"		=> "Usermap",
-		"description"	=> "Makes a usermap system.",
+		"description"	=> "Adds a map where your user can pin their location on to your MyBB board.",
 		"website"	=> "http://www.Online-Urbanus.be",
 		"author"	=> "Paretje",
 		"authorsite"	=> "http://www.Online-Urbanus.be",
-		"version"	=> "1.1.2",
+		"version"	=> "1.2 alpha",
 		"guid"		=> "68b7d024b9cefc58cd2c8676a0ae60f8",
-		"compatibility" => "14*,16*"
+		"compatibility" => "16*"
 	);
 }
 
 function usermap_install()
 {
 	global $cache, $db;
-	
+	// TODO: Can we do it a bit more general?
 	//Insert Usermap tables
 	$db->write_query("CREATE TABLE `".TABLE_PREFIX."usermap_places` (
 	`pid` INT(5) NOT NULL AUTO_INCREMENT,
@@ -185,12 +189,20 @@ function usermap_install()
 	//Update adminpermissions
 	change_admin_permission("config", "usermap", 1);
 	
+	// TODO: sensor parameter
+	// https://developers.google.com/maps/documentation/javascript/tutorial?hl=nl#Loading_the_Maps_API
+	// zie template_usermap.html
+	// Wat is dat daar van MapOptions. Dat wordt daar toch nooit gemaakt, enkel {}.
+	// Of is dat overloaden of zo? Ik vermoed dat de constructor van Map het omzet, niet?
+	// Google:
+	// The default UI is on by default in v3. You can disable this by setting the disableDefaultUI property to true in the MapOptions object.
+	// Waarom moeten we dan google.maps.MapTypeId.ROADMAP doen? Wat doet dit dan nog, of is dat nog iets anders?
 	//Templates
 	$templates['usermap'] = "<html>
 <head>
-<title>{\$mybb->settings[\'bbname\']} - {\$lang->usermap}</title>
+<title>{\$mybb->settings['bbname']} - {\$lang->usermap}</title>
 {\$headerinclude}
-<script type=\"text/javascript\" src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key={\$mybb->settings[\'usermap_apikey\']}\"></script>
+<script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key={\$mybb->settings['usermap_apikey']}\"></script>
 <script type=\"text/javascript\">
 var map = true;
 </script>
@@ -201,16 +213,19 @@ var map = true;
 <script type=\"text/javascript\">
 function initialize()
 {
-	map = new GMap2(document.getElementById(\"map\"));
-	map.setCenter(new GLatLng({\$default_place[\'lat\']}, {\$default_place[\'lon\']}), {\$default_place[\'zoom\']});
-	map.setUIToDefault();
+	map = new google.maps.Map(document.getElementById(\"map\"), {
+		center: new google.maps.LatLng({\$default_place['lat']}, {\$default_place['lon']}),
+		zoom: {\$default_place['zoom']},
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	});
 	setPins(map);
 }
+google.maps.event.addDomListener(window, 'load', initialize);
 </script>
 </head>
-<body  onload=\"initialize()\" onunload=\"GUnload()\">
+<body>
 {\$header}
-<table border=\"0\" cellspacing=\"{\$theme[\'borderwidth\']}\" cellpadding=\"{\$theme[\'tablespace\']}\" class=\"tborder\">
+<table border=\"0\" cellspacing=\"{\$theme['borderwidth']}\" cellpadding=\"{\$theme['tablespace']}\" class=\"tborder\">
 <tr>
 <td colspan=\"2\" class=\"thead\"><strong>{\$lang->usermap}</strong></td>
 </tr>
@@ -227,7 +242,7 @@ function initialize()
 </tr>
 <tr>
 <td colspan=\"2\" class=\"trow1\">
-<center><div id=\"map\" style=\"width: {\$mybb->settings[\'usermap_width\']}px; height: {\$mybb->settings[\'usermap_height\']}px\"></div></center>
+<center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}px; height: {\$mybb->settings['usermap_height']}px\"></div></center>
 </td>
 </tr>
 </table>
@@ -242,7 +257,7 @@ function initialize()
 <strong>{\$lang->yourpin}</strong>
 </td>
 <td class=\"trow1\">
-<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->user[\'usermap_adress\']}\" />
+<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->user['usermap_adress']}\" />
 </td>
 </tr>
 <tr>
@@ -253,7 +268,7 @@ function initialize()
 <select name=\"pinimg\" onchange=\"swapIMG(this.value)\">
 {\$usermap_pinimgs_bit}
 </select>
-<img name=\"pin_image\" src=\"images/pinimgs/{\$default_pinimg[\'file\']}\" alt=\"\" />
+<img name=\"pin_image\" src=\"images/pinimgs/{\$default_pinimg['file']}\" alt=\"\" />
 </td>
 </tr>
 <tr>
@@ -263,11 +278,12 @@ function initialize()
 </tr>
 </form>";
 	
+	// TODO: kan dit niet gewoon hetzelfde zijn als usermap
 	$templates['usermap_pin'] = "<html>
 <head>
-<title>{\$mybb->settings[\'bbname\']} - {\$lang->usermap}</title>
+<title>{\$mybb->settings['bbname']} - {\$lang->usermap}</title>
 {\$headerinclude}
-<script type=\"text/javascript\" src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key={\$mybb->settings[\'usermap_apikey\']}\"></script>
+<script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key={\$mybb->settings['usermap_apikey']}\"></script>
 {\$usermap_pinimgs_swapimg}
 {\$usermap_pinimgs_java}
 {\$usermap_pins}
@@ -284,7 +300,7 @@ function initialize()
 </head>
 <body  onload=\"initialize()\" onunload=\"GUnload()\">
 {\$header}
-<table border=\"0\" cellspacing=\"{\$theme[\'borderwidth\']}\" cellpadding=\"{\$theme[\'tablespace\']}\" class=\"tborder\">
+<table border=\"0\" cellspacing=\"{\$theme['borderwidth']}\" cellpadding=\"{\$theme['tablespace']}\" class=\"tborder\">
 <tr>
 <td colspan=\"2\" class=\"thead\"><strong>{\$lang->usermap}</strong></td>
 </tr>
@@ -295,7 +311,7 @@ function initialize()
 <strong>{\$lang->yourpin}</strong>
 </td>
 <td class=\"trow1\">
-<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->input[\'adress\']}\" />
+<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->input['adress']}\" />
 </td>
 </tr>
 <tr>
@@ -306,7 +322,7 @@ function initialize()
 <select name=\"pinimg\" onchange=\"swapIMG(this.value)\">
 {\$usermap_pinimgs_bit}
 </select>
-<img name=\"pin_image\" src=\"images/pinimgs/{\$mybb->input[\'pinimg\']}\">
+<img name=\"pin_image\" src=\"images/pinimgs/{\$mybb->input['pinimg']}\">
 </td>
 </tr>
 <tr>
@@ -319,17 +335,17 @@ function initialize()
 <td colspan=\"2\" class=\"trow2\">
 <form method=\"post\" action=\"usermap.php\">
 <input type=\"hidden\" name=\"action\" value=\"do_pin\" />
-<input type=\"hidden\" name=\"lat\" value=\"{\$users[\'usermap_lat\']}\" />
-<input type=\"hidden\" name=\"lon\" value=\"{\$users[\'usermap_lon\']}\" />
-<input type=\"hidden\" name=\"pinimg\" value=\"{\$mybb->input[\'pinimg\']}\" />
-<input type=\"hidden\" name=\"adress\" value=\"{\$mybb->input[\'adress\']}\" />
+<input type=\"hidden\" name=\"lat\" value=\"{\$users['usermap_lat']}\" />
+<input type=\"hidden\" name=\"lon\" value=\"{\$users['usermap_lon']}\" />
+<input type=\"hidden\" name=\"pinimg\" value=\"{\$mybb->input['pinimg']}\" />
+<input type=\"hidden\" name=\"adress\" value=\"{\$mybb->input['adress']}\" />
 <center><input type=\"submit\" class=\"submit\" value=\"{\$lang->ok}\"></center>
 </form>
 </td>
 </tr>
 <tr>
 <td colspan=\"2\" class=\"trow1\">
-<center><div id=\"map\" style=\"width: {\$mybb->settings[\'usermap_width\']}px; height: {\$mybb->settings[\'usermap_height\']}px\"></div></center>
+<center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}px; height: {\$mybb->settings['usermap_height']}px\"></div></center>
 </td>
 </tr>
 </table>
@@ -337,14 +353,14 @@ function initialize()
 </body>
 </html>";
 	
-	$templates['usermap_pinimgs_bit'] = "<option value=\"{\$pinimg[\'file\']}\"{\$selected_pinimg[\$pinimg[\'file\']]}>{\$pinimg[\'name\']}</option>";
+	$templates['usermap_pinimgs_bit'] = "<option value=\"{\$pinimg['file']}\"{\$selected_pinimg[\$pinimg['file']]}>{\$pinimg['name']}</option>";
 	
 	$templates['usermap_pinimgs_java'] = "<script type=\"text/javascript\">
 {\$usermap_pinimgs_java_bit}
 </script>";
 	
 	$templates['usermap_pinimgs_java_bit'] = "var icon{\$file[0]} = new GIcon();
-icon{\$file[0]}.image = \"images/pinimgs/{\$pinimg[\'file\']}\";
+icon{\$file[0]}.image = \"images/pinimgs/{\$pinimg['file']}\";
 icon{\$file[0]}.shadow = \"images/pinimgs/shadow.png\";
 icon{\$file[0]}.iconSize = new GSize(12, 20);
 icon{\$file[0]}.shadowSize = new GSize(22, 20);
@@ -354,7 +370,7 @@ icon{\$file[0]}.infoWindowAnchor = new GPoint(5, 1);";
 	$templates['usermap_pinimgs_swapimg'] = "<script type=\"text/javascript\">
 function swapIMG(imgname)
 {
-	document.images[\'pin_image\'].src = \"images/pinimgs/\"+imgname;
+	document.images['pin_image'].src = \"images/pinimgs/\"+imgname;
 }
 </script>";
 	
@@ -365,16 +381,16 @@ function setPins(map)
 }
 </script>";
 	
-	$templates['usermap_pins_bit'] = "	var marker{\$count} = new GMarker(new GLatLng({\$coordinates}), icon{\$userpin[\'pinimg\']});
+	$templates['usermap_pins_bit'] = "	var marker{\$count} = new GMarker(new GLatLng({\$coordinates}), icon{\$userpin['pinimg']});
 	map.addOverlay(marker{\$count});
 	GEvent.addListener(marker{\$count}, \"mouseover\", function()
 	{
-		marker{\$count}.openInfoWindowHtml(\"{\$userpin[\'window\']}\");
+		marker{\$count}.openInfoWindowHtml(\"{\$userpin['window']}\");
 	})";
 	
 	$templates['usermap_pins_bit_user'] = "{\$username}{\$avatar}";
 	
-	$templates['usermap_places_bit'] = "<option value=\"{\$places[\'pid\']}\"{\$selected_place[\$places[\'pid\']]}>{\$places[\'name\']}</option>";
+	$templates['usermap_places_bit'] = "<option value=\"{\$places['pid']}\"{\$selected_place[\$places['pid']]}>{\$places['name']}</option>";
 	
 	$templates['usermap_places_java'] = "<script type=\"text/javascript\">
 function moveMap(country)
@@ -386,18 +402,18 @@ function moveMap(country)
 }
 </script>";
 	
-	$templates['usermap_places_java_bit'] = "		case \'{\$places[\'pid\']}\':
-			map.setCenter(new GLatLng({\$places[\'lat\']}, {\$places[\'lon\']}), {\$places[\'zoom\']});
+	$templates['usermap_places_java_bit'] = "		case '{\$places['pid']}':
+			map.setCenter(new GLatLng({\$places['lat']}, {\$places['lon']}), {\$places['zoom']});
 		break;";
 	
 	// Insert the new templates into the database.
 	foreach($templates as $title => $template)
 	{
 		$template_insert = array(
-			"title"		=> $title,
-			"template"	=> $template,
-			"sid"		=> "-1",
-			'version'	=> "1400",
+			"title"		=> $db->escape_string($title),
+			"template"	=> $db->escape_string($template),
+			"sid"		=> -1,
+			'version'	=> $db->escape_string($mybb->version_code),
 			'dateline'	=> TIME_NOW
 		);
 		

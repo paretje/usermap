@@ -12,9 +12,13 @@
 
 /***************************************************************************
  *
- *   This program is based on the GPLed mod called "skunkmap" version 1.1, made by King Butter - NCAAbbs SkunkWorks Team <http://www.ncaabbs.com>, which was released on the MyBB Mods site on 22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
+ *   This program is based on the GPLed mod called "skunkmap" version 1.1,
+ *   made by King Butter - NCAAbbs SkunkWorks Team
+ *   <http://www.ncaabbs.com>, which was released on the MyBB Mods site on
+ *   22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
  * 
- * So, I call my special thanks to the maker(s) of that program!
+ *   So, this way, I wish to credit the original developer for their
+ *   indirect contribution to this work.
  *
  ***************************************************************************/
 

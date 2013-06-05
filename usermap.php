@@ -2,19 +2,23 @@
 /***************************************************************************
  *
  *   Usermap-system for MyBB
- *   Copyright: © 2008-2010 Online - Urbanus
+ *   Copyright: © 2008-2013 Online - Urbanus
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 15/04/2010 by Paretje
+ *   Last modified: 03/06/2013 by Paretje
  *
  ***************************************************************************/
 
 /***************************************************************************
  *
- *   This program is based on the GPLed mod called "skunkmap" version 1.1, made by King Butter - NCAAbbs SkunkWorks Team <http://www.ncaabbs.com>, which was released on the MyBB Mods site on 22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
+ *   This program is based on the GPLed mod called "skunkmap" version 1.1,
+ *   made by King Butter - NCAAbbs SkunkWorks Team
+ *   <http://www.ncaabbs.com>, which was released on the MyBB Mods site on
+ *   22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
  * 
- * So, I call my special thanks to the maker(s) of that program!
+ *   So, this way, I wish to credit the original developer for their
+ *   indirect contribution to this work.
  *
  ***************************************************************************/
 
@@ -198,6 +202,7 @@ switch($mybb->input['action'])
 			$lookup_file = file_get_contents("http://maps.google.com/maps/geo?q=".urlencode($mybb->input['adress'])."&output=xml&key=".$mybb->settings['usermap_apikey']);
 			
 			//Fix the encoding bug in the gotten file of Google
+			// TODO: is this still the case?
 			$lookup_file = str_replace("encoding=\"UTF-8\"", "encoding=\"ISO-8859-1\"", $lookup_file);
 			
 			//Parse the xml-file
