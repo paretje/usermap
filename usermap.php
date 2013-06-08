@@ -135,7 +135,7 @@ switch($mybb->input['action'])
 			$users['usermap_pinimg'] = $file[0];
 			
 			//Username
-			$username = build_profile_link(format_name($users['username'], $users['usergroup'], $users['displaygroup']), $users['uid']);	
+			$username = build_profile_link(format_name($users['username'], $users['usergroup'], $users['displaygroup']), $users['uid']);
 			
 			//Avatar
 			if(!empty($users['avatar']))
@@ -281,7 +281,7 @@ switch($mybb->input['action'])
 			$userpin['pinimg'] = $file[0];
 			
 			//Username
-			$username = build_profile_link(format_name($mybb->user['username'], $mybb->user['usergroup'], $mybb->user['displaygroup']), $mybb->user['uid']);	
+			$username = build_profile_link(format_name($mybb->user['username'], $mybb->user['usergroup'], $mybb->user['displaygroup']), $mybb->user['uid']);
 			
 			//Avatar
 			if(!empty($mybb->user['avatar']))
