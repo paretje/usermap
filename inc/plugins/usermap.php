@@ -403,7 +403,8 @@ function moveMap(country)
 </script>";
 	
 	$templates['usermap_places_java_bit'] = "		case '{\$places['pid']}':
-			map.setCenter(new GLatLng({\$places['lat']}, {\$places['lon']}), {\$places['zoom']});
+			map.setCenter(new google.maps.LatLng({$places['lat']}, {$places['lon']}));
+			map.setZoom({$places['zoom']});
 		break;";
 	
 	// Insert the new templates into the database.
