@@ -42,7 +42,12 @@
 //Define MyBB and includes
 define("IN_MYBB", 1);
 
-$templatelist = "usermap,usermap_form,usermap_pin,usermap_pinimgs,usermap_pinimgs_bit,usermap_pinimgs_java,usermap_pinimgs_java_bit,usermap_pinimgs_swapimg,usermap_pins,usermap_pins_bit,usermap_pinimgs_bit_user,usermap_places_bit,usermap_places_java,usermap_places_java_bit";
+$templatelist = "usermap,usermap_form,usermap_pin,usermap_pinimgs,";
+$templatelist .= "usermap_pinimgs_bit,usermap_pinimgs_java,";
+$templatelist .= "usermap_pinimgs_java_bit,usermap_pinimgs_swapimg,";
+$templatelist .= "usermap_pins,usermap_pins_bit,usermap_pinimgs_bit_user,";
+$templatelist .= "usermap_places_bit,usermap_places_java,";
+$templatelist .= "usermap_places_java_bit";
 
 require_once "./global.php";
 
@@ -203,36 +208,35 @@ switch($mybb->input['action'])
 		else
 		{
 			//Load the xml-file of Google for the given place
-			$lookup_file = file_get_contents("http://maps.google.com/maps/geo?q=".urlencode($mybb->input['adress'])."&output=xml&key=".$mybb->settings['usermap_apikey']);
+			$lookup_file = file_get_contents("https://maps.googleapis.com/maps/api/geocode/xml?address=".urlencode($mybb->input['adress'])."&sensor=false");
 			
 			//Fix the encoding bug in the gotten file of Google
 			// TODO: is this still the case?
-			$lookup_file = str_replace("encoding=\"UTF-8\"", "encoding=\"ISO-8859-1\"", $lookup_file);
+			//$lookup_file = str_replace("encoding=\"UTF-8\"", "encoding=\"ISO-8859-1\"", $lookup_file);
 			
 			//Parse the xml-file
 			$parser = new XMLParser($lookup_file);
 			$lookup = $parser->get_tree();
 			
-			if($lookup['kml']['Response']['Status']['code']['value'] != 200)
+			// TODO: https://developers.google.com/maps/documentation/geocoding/?hl=nl#StatusCodes
+			// So, some other errors might be usefull
+			if($lookup['GeocodeResponse']['status']['value'] != "OK")
 			{
 				error($lang->coordinatesnotfound, $lang->error);
 			}
 			else
 			{
 				//Load response
-				if(!isset($lookup['kml']['Response']['Placemark']['Point']['coordinates']['value']))
+				if(!isset($lookup['GeocodeResponse']['result']['geometry']['location']))
 				{
-					$response = $lookup['kml']['Response']['Placemark'][0]['Point']['coordinates']['value'];
+					$response = $lookup['GeocodeResponse']['result'][0]['geometry']['location'];
 				}
 				else
 				{
-					$response = $lookup['kml']['Response']['Placemark']['Point']['coordinates']['value'];
+					$response = $lookup['GeocodeResponse']['result']['geometry']['location'];
 				}
 				
-				//Load coordinates
-				$coordinates = explode(",", $response);
-				
-				redirect("usermap.php?action=pin&lat=".$coordinates[1]."&lon=".$coordinates[0]."&pinimg=".$mybb->input['pinimg']."&adress=".$mybb->input['adress'], $lang->coordinatesfound);
+				redirect("usermap.php?action=pin&lat=".$response['lat']['value']."&lon=".$response['lng']['value']."&pinimg=".$mybb->input['pinimg']."&adress=".$mybb->input['adress'], $lang->coordinatesfound);
 			}
 		}
 	break;
