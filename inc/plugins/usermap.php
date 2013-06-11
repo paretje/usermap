@@ -278,12 +278,15 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </tr>
 </form>";
 	
-	// TODO: kan dit niet gewoon hetzelfde zijn als usermap
+	// TODO: kan dit niet gewoon hetzelfde zijn als usermap?
 	$templates['usermap_pin'] = "<html>
 <head>
 <title>{\$mybb->settings['bbname']} - {\$lang->usermap}</title>
 {\$headerinclude}
-<script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key={\$mybb->settings['usermap_apikey']}\"></script>
+<script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key={\$mybb->settings['usermap_apikey']}&sensor=false\"></script>
+<script type=\"text/javascript\">
+var map = true;
+</script>
 {\$usermap_pinimgs_swapimg}
 {\$usermap_pinimgs_java}
 {\$usermap_pins}
@@ -291,14 +294,16 @@ google.maps.event.addDomListener(window, 'load', initialize);
 <script type=\"text/javascript\">
 function initialize()
 {
-	var map = new GMap2(document.getElementById(\"map\"));
-	map.setCenter(new GLatLng({\$coordinates}), 14);
-	map.setUIToDefault();
+	map = new google.maps.Map(document.getElementById(\"map\"), {
+		center: new google.maps.LatLng({\$coordinates}),
+		zoom: 14,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	});
 	setPins(map);
 }
-</script>
+google.maps.event.addDomListener(window, 'load', initialize);</script>
 </head>
-<body  onload=\"initialize()\" onunload=\"GUnload()\">
+<body>
 {\$header}
 <table border=\"0\" cellspacing=\"{\$theme['borderwidth']}\" cellpadding=\"{\$theme['tablespace']}\" class=\"tborder\">
 <tr>
@@ -390,8 +395,10 @@ function setPins(map)
 	
 	$templates['usermap_pins_bit_user'] = "{\$username}{\$avatar}";
 	
+	// OK
 	$templates['usermap_places_bit'] = "<option value=\"{\$places['pid']}\"{\$selected_place[\$places['pid']]}>{\$places['name']}</option>";
 	
+	// OK?
 	$templates['usermap_places_java'] = "<script type=\"text/javascript\">
 function moveMap(country)
 {
@@ -402,6 +409,7 @@ function moveMap(country)
 }
 </script>";
 	
+	// OK
 	$templates['usermap_places_java_bit'] = "		case '{\$places['pid']}':
 			map.setCenter(new google.maps.LatLng({$places['lat']}, {$places['lon']}));
 			map.setZoom({$places['zoom']});
