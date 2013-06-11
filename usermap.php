@@ -6,7 +6,7 @@
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 03/06/2013 by Paretje
+ *   Last modified: 11/06/2013 by Paretje
  *
  ***************************************************************************/
 
@@ -166,13 +166,17 @@ switch($mybb->input['action'])
 			}
 		}
 		
-		foreach($userpins as $coordinates => $userpin)
+		if(is_array($userpins))
 		{
-			$count++;
-			eval("\$usermap_pins_bit .= \"".$templates->get("usermap_pins_bit")."\";");
+			foreach($userpins as $coordinates => $userpin)
+			{
+				$count++;
+				eval("\$usermap_pins_bit .= \"".$templates->get("usermap_pins_bit")."\";");
+			}
 		}
 		
 		eval("\$usermap_pins = \"".$templates->get("usermap_pins")."\";");
+		
 		
 		//Form if logged in
 		if($mybb->user['uid'] != 0 && $mybb->usergroup['canaddusermappin'] == 1)
