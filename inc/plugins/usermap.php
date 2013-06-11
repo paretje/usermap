@@ -189,14 +189,6 @@ function usermap_install()
 	//Update adminpermissions
 	change_admin_permission("config", "usermap", 1);
 	
-	// TODO: sensor parameter
-	// https://developers.google.com/maps/documentation/javascript/tutorial?hl=nl#Loading_the_Maps_API
-	// zie template_usermap.html
-	// Wat is dat daar van MapOptions. Dat wordt daar toch nooit gemaakt, enkel {}.
-	// Of is dat overloaden of zo? Ik vermoed dat de constructor van Map het omzet, niet?
-	// Google:
-	// The default UI is on by default in v3. You can disable this by setting the disableDefaultUI property to true in the MapOptions object.
-	// Waarom moeten we dan google.maps.MapTypeId.ROADMAP doen? Wat doet dit dan nog, of is dat nog iets anders?
 	//Templates
 	$templates['usermap'] = "<html>
 <head>
@@ -250,6 +242,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </body>
 </html>";
 	
+	// TODO: the pinimg part should be removed
 	$templates['usermap_form'] = "<form method=\"post\" action=\"usermap.php\">
 <input type=\"hidden\" name=\"action\" value=\"lookup\" />
 <tr>
@@ -278,7 +271,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </tr>
 </form>";
 	
-	// TODO: kan dit niet gewoon hetzelfde zijn als usermap?
+	// TODO: merge with usermap
 	$templates['usermap_pin'] = "<html>
 <head>
 <title>{\$mybb->settings['bbname']} - {\$lang->usermap}</title>
@@ -358,20 +351,28 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 </body>
 </html>";
 	
+	// TODO: Hmmm, that thing of selecting an icon is way to limited.
+	// So, I think it should be simply deleted in default version.
 	$templates['usermap_pinimgs_bit'] = "<option value=\"{\$pinimg['file']}\"{\$selected_pinimg[\$pinimg['file']]}>{\$pinimg['name']}</option>";
 	
-	$templates['usermap_pinimgs_java'] = "<script type=\"text/javascript\">
+	// TODO: delete
+	$templates['usermap_pinimgs_java'] = "<<script type=\"text/javascript\">
+var shadow = {
+	url: \"images/pinimgs/shadow.png\",
+	size: new google.maps.Size(22, 20),
+	anchor: new google.maps.Point(6, 20)
+}
 {\$usermap_pinimgs_java_bit}
 </script>";
 	
-	$templates['usermap_pinimgs_java_bit'] = "var icon{\$file[0]} = new GIcon();
-icon{\$file[0]}.image = \"images/pinimgs/{\$pinimg['file']}\";
-icon{\$file[0]}.shadow = \"images/pinimgs/shadow.png\";
-icon{\$file[0]}.iconSize = new GSize(12, 20);
-icon{\$file[0]}.shadowSize = new GSize(22, 20);
-icon{\$file[0]}.iconAnchor = new GPoint(6, 20);
-icon{\$file[0]}.infoWindowAnchor = new GPoint(5, 1);";
+	// TODO: delete
+	$templates['usermap_pinimgs_java_bit'] = "var icon{\$file[0]} = {
+	url: \"images/pinimgs/{\$pinimg['file']}\",
+	size: new google.maps.Size(12, 20),
+	anchor: new google.maps.Point(6, 20),
+};";
 	
+	// TODO: delete
 	$templates['usermap_pinimgs_swapimg'] = "<script type=\"text/javascript\">
 function swapIMG(imgname)
 {
@@ -379,6 +380,7 @@ function swapIMG(imgname)
 }
 </script>";
 	
+	// OK
 	$templates['usermap_pins'] = "<script type=\"text/javascript\">
 function setPins(map)
 {
@@ -386,9 +388,11 @@ function setPins(map)
 }
 </script>";
 	
+	// TODO: icon and shadow should be deleted
 	$templates['usermap_pins_bit'] = "	var marker{\$count} = new google.maps.Marker({
 		position: new google.maps.LatLng({\$coordinates}),
-		icon: icon{\$userpin['pinimg']}
+		icon: icon{\$userpin['pinimg']},
+		shadow: shadow
 	});
 	marker{\$count}.setMap(map);
 	google.maps.event.addListener(marker{\$count}, \"click\", function()
@@ -396,6 +400,7 @@ function setPins(map)
 		new google.maps.InfoWindow({content: \"{\$userpin['window']}\"}).open(map, marker{\$count});
 	});";
 	
+	// OK
 	$templates['usermap_pins_bit_user'] = "{\$username}{\$avatar}";
 	
 	// OK
