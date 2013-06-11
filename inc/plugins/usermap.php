@@ -6,7 +6,7 @@
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 05/06/2013 by Paretje
+ *   Last modified: 11/06/2013 by Paretje
  *
  ***************************************************************************/
 
@@ -202,7 +202,7 @@ function usermap_install()
 <head>
 <title>{\$mybb->settings['bbname']} - {\$lang->usermap}</title>
 {\$headerinclude}
-<script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key={\$mybb->settings['usermap_apikey']}\"></script>
+<script type=\"text/javascript\" src=\"http://maps.googleapis.com/maps/api/js?key={\$mybb->settings['usermap_apikey']}&sensor=false\"></script>
 <script type=\"text/javascript\">
 var map = true;
 </script>
