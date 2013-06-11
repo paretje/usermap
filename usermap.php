@@ -210,10 +210,6 @@ switch($mybb->input['action'])
 			//Load the xml-file of Google for the given place
 			$lookup_file = file_get_contents("https://maps.googleapis.com/maps/api/geocode/xml?address=".urlencode($mybb->input['adress'])."&sensor=false");
 			
-			//Fix the encoding bug in the gotten file of Google
-			// TODO: is this still the case?
-			//$lookup_file = str_replace("encoding=\"UTF-8\"", "encoding=\"ISO-8859-1\"", $lookup_file);
-			
 			//Parse the xml-file
 			$parser = new XMLParser($lookup_file);
 			$lookup = $parser->get_tree();

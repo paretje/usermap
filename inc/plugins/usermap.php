@@ -386,12 +386,15 @@ function setPins(map)
 }
 </script>";
 	
-	$templates['usermap_pins_bit'] = "	var marker{\$count} = new GMarker(new GLatLng({\$coordinates}), icon{\$userpin['pinimg']});
-	map.addOverlay(marker{\$count});
-	GEvent.addListener(marker{\$count}, \"mouseover\", function()
+	$templates['usermap_pins_bit'] = "	var marker{\$count} = new google.maps.Marker({
+		position: new google.maps.LatLng({\$coordinates}),
+		icon: icon{\$userpin['pinimg']}
+	});
+	marker{\$count}.setMap(map);
+	google.maps.event.addListener(marker{\$count}, \"click\", function()
 	{
-		marker{\$count}.openInfoWindowHtml(\"{\$userpin['window']}\");
-	})";
+		new google.maps.InfoWindow({content: \"{\$userpin['window']}\"}).open(map, marker{\$count});
+	});";
 	
 	$templates['usermap_pins_bit_user'] = "{\$username}{\$avatar}";
 	
