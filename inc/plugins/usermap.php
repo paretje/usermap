@@ -63,7 +63,7 @@ function usermap_info()
 		"website"	=> "http://www.Online-Urbanus.be",
 		"author"	=> "Paretje",
 		"authorsite"	=> "http://www.Online-Urbanus.be",
-		"version"	=> "1.2 alpha",
+		"version"	=> "1.2 beta",
 		"guid"		=> "68b7d024b9cefc58cd2c8676a0ae60f8",
 		"compatibility" => "16*"
 	);
@@ -356,7 +356,7 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 	$templates['usermap_pinimgs_bit'] = "<option value=\"{\$pinimg['file']}\"{\$selected_pinimg[\$pinimg['file']]}>{\$pinimg['name']}</option>";
 	
 	// TODO: delete
-	$templates['usermap_pinimgs_java'] = "<<script type=\"text/javascript\">
+	$templates['usermap_pinimgs_java'] = "<script type=\"text/javascript\">
 var shadow = {
 	url: \"images/pinimgs/shadow.png\",
 	size: new google.maps.Size(22, 20),
@@ -419,8 +419,8 @@ function moveMap(country)
 	
 	// OK
 	$templates['usermap_places_java_bit'] = "		case '{\$places['pid']}':
-			map.setCenter(new google.maps.LatLng({$places['lat']}, {$places['lon']}));
-			map.setZoom({$places['zoom']});
+			map.setCenter(new google.maps.LatLng({\$places['lat']}, {\$places['lon']}));
+			map.setZoom({\$places['zoom']});
 		break;";
 	
 	// Insert the new templates into the database.
