@@ -6,7 +6,7 @@
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 12/06/2013 by Paretje
+ *   Last modified: 13/06/2013 by Paretje
  *
  ***************************************************************************/
 
@@ -17,7 +17,7 @@
  *   <http://www.ncaabbs.com>, which was released on the MyBB Mods site on
  *   22nd May 2007 <http://mods.mybboard.net/view/skunkmap>.
  * 
- *   So, this way, I wish to credit the original developer for their
+ *   So, this way, I wish to credit the original developers for their
  *   indirect contribution to this work.
  *
  ***************************************************************************/
@@ -39,25 +39,23 @@
  *
  ***************************************************************************/
 
-//Define MyBB and includes
+// Define MyBB, needed templates and includes
 define("IN_MYBB", 1);
 
-$templatelist = "usermap,usermap_form,usermap_pin,usermap_pinimgs,";
-$templatelist .= "usermap_pinimgs_bit,usermap_pinimgs_java,";
-$templatelist .= "usermap_pinimgs_java_bit,usermap_pinimgs_swapimg,";
-$templatelist .= "usermap_pins,usermap_pins_bit,usermap_pinimgs_bit_user,";
+$templatelist = "usermap,usermap_form,usermap_pin,";
+$templatelist .= "usermap_pins,usermap_pins_bit,usermap_pins_bit_user,";
 $templatelist .= "usermap_places_bit,usermap_places_java,";
 $templatelist .= "usermap_places_java_bit";
 
 require_once "./global.php";
 
-//Plugin
+// Plugin hook
 $plugins->run_hooks("username_start");
 
-//Navigation
+// Define point in navigation
 add_breadcrumb($lang->usermap, "usermap.php");
 
-//Control permission
+// Control if the user has permission to view the usermap
 if($mybb->usergroup['canviewusermap'] != "1")
 {
 	error_no_permission();
@@ -66,18 +64,14 @@ if($mybb->usergroup['canviewusermap'] != "1")
 switch($mybb->input['action'])
 {
 	default:
-		/***********************************
-		 *   Defaults
-		 ***********************************/
+		// TODO: This should be put in the database
+		// Load the default place of the Usermap
 		$defaults = $cache->read("usermap");
 		
-		/***********************************
-		 *   Places
-		 ***********************************/
-		//Selected
+		// Select the default place by default
 		$selected_place[$defaults['place']] = " selected=\"selected\"";
 		
-		//Loading
+		// Load the places in the database
 		$query2 = $db->query("SELECT * FROM ".TABLE_PREFIX."usermap_places ORDER BY displayorder ASC");
 		while($places = $db->fetch_array($query2))
 		{
@@ -94,21 +88,18 @@ switch($mybb->input['action'])
 			eval("\$usermap_places_java_bit .= \"".$templates->get("usermap_places_java_bit")."\";");
 		}
 		
-		//Java
+		// Load the needed JavaScript
 		eval("\$usermap_places_java = \"".$templates->get("usermap_places_java")."\";");
 		
-		/***********************************
-		 *   Load locations of users, the pins
-		 ***********************************/
-		$count = 0;
-		
-		$query = $db->query("SELECT * FROM ".TABLE_PREFIX."users WHERE usermap_lat!='0' AND usermap_lon!='0'");
+		// TODO: Any other interesting columns in the database?
+		// Load the pin locations
+		$query = $db->query("SELECT uid, username, usergroup, displaygroup, avatar, usermap_lat, usermap_lon FROM ".TABLE_PREFIX."users WHERE usermap_lat!='0' AND usermap_lon!='0'");
 		while($users = $db->fetch_array($query))
 		{
-			//Username
+			// Create a formatted link to the profile of the user
 			$username = build_profile_link(format_name($users['username'], $users['usergroup'], $users['displaygroup']), $users['uid']);
 			
-			//Avatar
+			// Load the avatar of the user, if applicable
 			if(!empty($users['avatar']))
 			{
 				$avatar = "<br /><img src=\"".$users['avatar']."\" alt=\"\" />";
@@ -118,7 +109,7 @@ switch($mybb->input['action'])
 				$avatar = "";
 			}
 			
-			//Plugin
+			// Plugin hook
 			$plugins->run_hooks("username_default_while");
 			
 			eval("\$usermap_pins_bit_user = \"".$templates->get("usermap_pins_bit_user", 1, 0)."\";");
@@ -126,22 +117,18 @@ switch($mybb->input['action'])
 			$usermap_pins_bit_user = str_replace("\"", "'", $usermap_pins_bit_user);
 			$usermap_pins_bit_user = str_replace("\n", "", $usermap_pins_bit_user);
 			
-			// TODO: Can't this be done a bit more elegant?
-			if(!is_array($userpins[$users['usermap_lat'].", ".$users['usermap_lon']]))
-			{
-				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['window'] = $usermap_pins_bit_user;
-			}
-			else
-			{
-				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['window'] .= "<br /><br />".$usermap_pins_bit_user;
-			}
+			// Add user to pin on the specified location
+			$userpins[$users['usermap_lat'].", ".$users['usermap_lon']][] = $usermap_pins_bit_user;
 		}
 		
+		// If there are pins added, show them on the map
 		if(is_array($userpins))
 		{
+			$count = 0;
 			foreach($userpins as $coordinates => $userpin)
 			{
 				$count++;
+				$window = implode($userpin, "<br /><br />");
 				eval("\$usermap_pins_bit .= \"".$templates->get("usermap_pins_bit")."\";");
 			}
 		}
@@ -149,7 +136,8 @@ switch($mybb->input['action'])
 		eval("\$usermap_pins = \"".$templates->get("usermap_pins")."\";");
 		
 		
-		//Form if logged in
+		// If the user is logged in, and he has the needed permissions,
+		// show him the form to add a pin.
 		if($mybb->user['uid'] != 0 && $mybb->usergroup['canaddusermappin'] == 1)
 		{
 			eval("\$usermap_form = \"".$templates->get("usermap_form")."\";");
@@ -161,7 +149,7 @@ switch($mybb->input['action'])
 	case 'lookup':
 		require_once MYBB_ROOT."inc/class_xml.php";
 		
-		//Guests
+		// Does the user has the required permissions to continue?
 		if($mybb->user['uid'] == 0 || $mybb->usergroup['canaddusermappin'] == 0)
 		{
 			error_no_permission();

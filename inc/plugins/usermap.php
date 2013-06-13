@@ -327,7 +327,7 @@ function setPins(map)
 	marker{\$count}.setMap(map);
 	google.maps.event.addListener(marker{\$count}, \"click\", function()
 	{
-		new google.maps.InfoWindow({content: \"{\$userpin['window']}\"}).open(map, marker{\$count});
+		new google.maps.InfoWindow({content: \"{\$window}\"}).open(map, marker{\$count});
 	});";
 	
 	// OK
@@ -397,9 +397,8 @@ function usermap_uninstall()
 	
 	rebuild_settings();
 	
-	// TODO: update this!
 	//Delete templates
-	$deletetemplates = array('usermap', 'usermap_form', 'usermap_pin', 'usermap_pinimgs', 'usermap_pinimgs_bit', 'usermap_pinimgs_java', 'usermap_pinimgs_java_bit', 'usermap_pinimgs_swapimg', 'usermap_pins', 'usermap_pins_bit', 'usermap_pinimgs_bit_user', 'usermap_places_bit', 'usermap_places_java', 'usermap_places_java_bit');
+	$deletetemplates = array('usermap', 'usermap_form', 'usermap_pin', 'usermap_pins', 'usermap_pins_bit', 'usermap_pins_bit_user', 'usermap_places_bit', 'usermap_places_java', 'usermap_places_java_bit');
 	
 	foreach($deletetemplates as $title)
 	{
