@@ -6,7 +6,7 @@
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 11/06/2013 by Paretje
+ *   Last modified: 12/06/2013 by Paretje
  *
  ***************************************************************************/
 
@@ -63,7 +63,7 @@ function usermap_info()
 		"website"	=> "http://www.Online-Urbanus.be",
 		"author"	=> "Paretje",
 		"authorsite"	=> "http://www.Online-Urbanus.be",
-		"version"	=> "1.2 beta",
+		"version"	=> "1.2 beta 2",
 		"guid"		=> "68b7d024b9cefc58cd2c8676a0ae60f8",
 		"compatibility" => "16*"
 	);
@@ -111,19 +111,11 @@ function usermap_install()
 	$db->insert_query("usermap_places", $place2);
 	$db->insert_query("usermap_places", $place3);
 	
+	// TODO: Can't this be added to the table?
 	//Insert datacache information
-	//Pinimgs
-	$pinimgs[] = array(
-		"name"		=> "Default",
-		"file"		=> "pin.png"
-	);
-	
-	$cache->update("usermap_pinimgs", $pinimgs);
-	
 	//Default "settings"
 	$defaults = array(
-		"place"		=> "1",
-		"pinimg"	=> "0"
+		"place"		=> "1"
 	);
 	
 	$cache->update("usermap", $defaults);
@@ -147,6 +139,7 @@ function usermap_install()
 		"disporder"		=> "1",
 		"gid"			=> $gid
 	);
+	// TODO include the unit with the value, this makes it more flexible
 	$setting2 = array(
 		"name"			=> "usermap_width",
 		"title"			=> "Map Width",
@@ -177,9 +170,7 @@ function usermap_install()
 	ADD `canaddusermappin` INT(1) NOT NULL DEFAULT '1';");
 	
 	$db->write_query("ALTER TABLE `".TABLE_PREFIX."users` ADD `usermap_lat` FLOAT NOT NULL,
-	ADD `usermap_lon` FLOAT NOT NULL,
-	ADD `usermap_pinimg` VARCHAR(255) NOT NULL,
-	ADD `usermap_adress` VARCHAR(255) NOT NULL;");
+	ADD `usermap_lon` FLOAT NOT NULL;");
 	
 	$db->write_query("UPDATE ".TABLE_PREFIX."usergroups SET canviewusermap='0', canaddusermappin='0' WHERE gid='7'");
 	
@@ -198,8 +189,6 @@ function usermap_install()
 <script type=\"text/javascript\">
 var map = true;
 </script>
-{\$usermap_pinimgs_swapimg}
-{\$usermap_pinimgs_java}
 {\$usermap_pins}
 {\$usermap_places_java}
 <script type=\"text/javascript\">
@@ -250,18 +239,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 <strong>{\$lang->yourpin}</strong>
 </td>
 <td class=\"trow1\">
-<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->user['usermap_adress']}\" />
-</td>
-</tr>
-<tr>
-<td class=\"trow2\" width=\"40%\">
-<strong>{\$lang->yourpinimg}</strong>
-</td>
-<td class=\"trow2\">
-<select name=\"pinimg\" onchange=\"swapIMG(this.value)\">
-{\$usermap_pinimgs_bit}
-</select>
-<img name=\"pin_image\" src=\"images/pinimgs/{\$default_pinimg['file']}\" alt=\"\" />
+<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"address\" value=\"{\$mybb->user['usermap_address']}\" />
 </td>
 </tr>
 <tr>
@@ -280,8 +258,6 @@ google.maps.event.addDomListener(window, 'load', initialize);
 <script type=\"text/javascript\">
 var map = true;
 </script>
-{\$usermap_pinimgs_swapimg}
-{\$usermap_pinimgs_java}
 {\$usermap_pins}
 {\$usermap_places_java}
 <script type=\"text/javascript\">
@@ -309,18 +285,7 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 <strong>{\$lang->yourpin}</strong>
 </td>
 <td class=\"trow1\">
-<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"adress\" value=\"{\$mybb->input['adress']}\" />
-</td>
-</tr>
-<tr>
-<td class=\"trow2\" width=\"40%\">
-<strong>{\$lang->yourpinimg}</strong>
-</td>
-<td class=\"trow2\">
-<select name=\"pinimg\" onchange=\"swapIMG(this.value)\">
-{\$usermap_pinimgs_bit}
-</select>
-<img name=\"pin_image\" src=\"images/pinimgs/{\$mybb->input['pinimg']}\">
+<input type=\"text\" class=\"textbox\" size=\"40\" maxlength=\"255\" name=\"address\" value=\"{\$mybb->input['address']}\" />
 </td>
 </tr>
 <tr>
@@ -335,8 +300,6 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 <input type=\"hidden\" name=\"action\" value=\"do_pin\" />
 <input type=\"hidden\" name=\"lat\" value=\"{\$users['usermap_lat']}\" />
 <input type=\"hidden\" name=\"lon\" value=\"{\$users['usermap_lon']}\" />
-<input type=\"hidden\" name=\"pinimg\" value=\"{\$mybb->input['pinimg']}\" />
-<input type=\"hidden\" name=\"adress\" value=\"{\$mybb->input['adress']}\" />
 <center><input type=\"submit\" class=\"submit\" value=\"{\$lang->ok}\"></center>
 </form>
 </td>
@@ -351,35 +314,6 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 </body>
 </html>";
 	
-	// TODO: Hmmm, that thing of selecting an icon is way to limited.
-	// So, I think it should be simply deleted in default version.
-	$templates['usermap_pinimgs_bit'] = "<option value=\"{\$pinimg['file']}\"{\$selected_pinimg[\$pinimg['file']]}>{\$pinimg['name']}</option>";
-	
-	// TODO: delete
-	$templates['usermap_pinimgs_java'] = "<script type=\"text/javascript\">
-var shadow = {
-	url: \"images/pinimgs/shadow.png\",
-	size: new google.maps.Size(22, 20),
-	anchor: new google.maps.Point(6, 20)
-}
-{\$usermap_pinimgs_java_bit}
-</script>";
-	
-	// TODO: delete
-	$templates['usermap_pinimgs_java_bit'] = "var icon{\$file[0]} = {
-	url: \"images/pinimgs/{\$pinimg['file']}\",
-	size: new google.maps.Size(12, 20),
-	anchor: new google.maps.Point(6, 20),
-};";
-	
-	// TODO: delete
-	$templates['usermap_pinimgs_swapimg'] = "<script type=\"text/javascript\">
-function swapIMG(imgname)
-{
-	document.images['pin_image'].src = \"images/pinimgs/\"+imgname;
-}
-</script>";
-	
 	// OK
 	$templates['usermap_pins'] = "<script type=\"text/javascript\">
 function setPins(map)
@@ -389,11 +323,7 @@ function setPins(map)
 </script>";
 	
 	// TODO: icon and shadow should be deleted
-	$templates['usermap_pins_bit'] = "	var marker{\$count} = new google.maps.Marker({
-		position: new google.maps.LatLng({\$coordinates}),
-		icon: icon{\$userpin['pinimg']},
-		shadow: shadow
-	});
+	$templates['usermap_pins_bit'] = "	var marker{\$count} = new google.maps.Marker({position: new google.maps.LatLng({\$coordinates})});
 	marker{\$count}.setMap(map);
 	google.maps.event.addListener(marker{\$count}, \"click\", function()
 	{
@@ -446,7 +376,6 @@ function usermap_uninstall()
 	$db->write_query("DROP TABLE `".TABLE_PREFIX."usermap_places`;");
 	
 	//Delete datacache
-	$cache->update("usermap_pinimgs", false);
 	$cache->update("usermap", false);
 	
 	//MyBB-tables
@@ -454,9 +383,7 @@ function usermap_uninstall()
 	DROP `canaddusermappin`;");
 	
 	$db->write_query("ALTER TABLE `".TABLE_PREFIX."users` DROP `usermap_lat`,
-	DROP `usermap_lon`,
-	DROP `usermap_pinimg`,
-	DROP `usermap_adress`;");
+	DROP `usermap_lon`;");
 	
 	//Update usergroupschache
 	$cache->update_usergroups();
@@ -470,6 +397,7 @@ function usermap_uninstall()
 	
 	rebuild_settings();
 	
+	// TODO: update this!
 	//Delete templates
 	$deletetemplates = array('usermap', 'usermap_form', 'usermap_pin', 'usermap_pinimgs', 'usermap_pinimgs_bit', 'usermap_pinimgs_java', 'usermap_pinimgs_java_bit', 'usermap_pinimgs_swapimg', 'usermap_pins', 'usermap_pins_bit', 'usermap_pinimgs_bit_user', 'usermap_places_bit', 'usermap_places_java', 'usermap_places_java_bit');
 	

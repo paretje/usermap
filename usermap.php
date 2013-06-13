@@ -6,7 +6,7 @@
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 11/06/2013 by Paretje
+ *   Last modified: 12/06/2013 by Paretje
  *
  ***************************************************************************/
 
@@ -98,31 +98,6 @@ switch($mybb->input['action'])
 		eval("\$usermap_places_java = \"".$templates->get("usermap_places_java")."\";");
 		
 		/***********************************
-		 *   Pinimages
-		 ***********************************/
-		$pinimgs = $cache->read("usermap_pinimgs");
-		
-		//Default pin
-		$file = explode(".", $pinimgs[$defaults['pinimg']]['file']);
-		$default_pinimg = $pinimgs[$defaults['pinimg']];
-		$default_pinimg['pin'] = $file[0];
-		
-		//Selected
-		$selected_pinimg[$default_pinimg['file']] = " selected=\"selected\"";
-		
-		foreach($pinimgs as $pid => $pinimg)
-		{
-			$file = explode(".", $pinimg['file']);
-			
-			eval("\$usermap_pinimgs_bit .= \"".$templates->get("usermap_pinimgs_bit")."\";");
-			eval("\$usermap_pinimgs_java_bit .= \"".$templates->get("usermap_pinimgs_java_bit")."\";");
-		}
-		
-		//Java
-		eval("\$usermap_pinimgs_swapimg = \"".$templates->get("usermap_pinimgs_swapimg")."\";");
-		eval("\$usermap_pinimgs_java = \"".$templates->get("usermap_pinimgs_java")."\";");
-		
-		/***********************************
 		 *   Load locations of users, the pins
 		 ***********************************/
 		$count = 0;
@@ -130,15 +105,6 @@ switch($mybb->input['action'])
 		$query = $db->query("SELECT * FROM ".TABLE_PREFIX."users WHERE usermap_lat!='0' AND usermap_lon!='0'");
 		while($users = $db->fetch_array($query))
 		{
-			//Pinimg
-			if(empty($users['usermap_pinimg']))
-			{
-				$users['usermap_pinimg'] = $default_pinimg['file'];
-			}
-			
-			$file = explode(".", $users['usermap_pinimg']);
-			$users['usermap_pinimg'] = $file[0];
-			
 			//Username
 			$username = build_profile_link(format_name($users['username'], $users['usergroup'], $users['displaygroup']), $users['uid']);
 			
@@ -156,17 +122,17 @@ switch($mybb->input['action'])
 			$plugins->run_hooks("username_default_while");
 			
 			eval("\$usermap_pins_bit_user = \"".$templates->get("usermap_pins_bit_user", 1, 0)."\";");
+			// TODO: Wouldn't it be possible to replace " by \" instead of '
 			$usermap_pins_bit_user = str_replace("\"", "'", $usermap_pins_bit_user);
 			$usermap_pins_bit_user = str_replace("\n", "", $usermap_pins_bit_user);
 			
+			// TODO: Can't this be done a bit more elegant?
 			if(!is_array($userpins[$users['usermap_lat'].", ".$users['usermap_lon']]))
 			{
-				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['pinimg'] = $users['usermap_pinimg'];
 				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['window'] = $usermap_pins_bit_user;
 			}
 			else
 			{
-				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['pinimg'] = $default_pinimg['pin'];
 				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['window'] .= "<br /><br />".$usermap_pins_bit_user;
 			}
 		}
@@ -201,14 +167,14 @@ switch($mybb->input['action'])
 			error_no_permission();
 		}
 		
-		if(!isset($mybb->input['adress']) || !isset($mybb->input['pinimg']))
+		if(!isset($mybb->input['address']))
 		{
 			error($lang->noinput, $lang->error);
 		}
 		else
 		{
 			//Load the xml-file of Google for the given place
-			$lookup_file = file_get_contents("https://maps.googleapis.com/maps/api/geocode/xml?address=".urlencode($mybb->input['adress'])."&sensor=false");
+			$lookup_file = file_get_contents("https://maps.googleapis.com/maps/api/geocode/xml?address=".urlencode($mybb->input['address'])."&sensor=false");
 			
 			//Parse the xml-file
 			$parser = new XMLParser($lookup_file);
@@ -232,7 +198,7 @@ switch($mybb->input['action'])
 					$response = $lookup['GeocodeResponse']['result']['geometry']['location'];
 				}
 				
-				redirect("usermap.php?action=pin&lat=".$response['lat']['value']."&lon=".$response['lng']['value']."&pinimg=".$mybb->input['pinimg']."&adress=".$mybb->input['adress'], $lang->coordinatesfound);
+				redirect("usermap.php?action=pin&lat=".$response['lat']['value']."&lon=".$response['lng']['value']."&address=".$mybb->input['address'], $lang->coordinatesfound);
 			}
 		}
 	break;
@@ -243,7 +209,7 @@ switch($mybb->input['action'])
 			error_no_permission();
 		}
 		
-		if(!floatval($mybb->input['lat']) || !floatval($mybb->input['lon']) || !isset($mybb->input['pinimg']) || !isset($mybb->input['adress']))
+		if(!floatval($mybb->input['lat']) || !floatval($mybb->input['lon']) || !isset($mybb->input['address']))
 		{
 			error($lang->noinput, $lang->error);
 		}
@@ -255,35 +221,8 @@ switch($mybb->input['action'])
 			$defaults = $cache->read("usermap");
 			
 			/***********************************
-			 *   Pinimages
-			 ***********************************/
-			$pinimgs = $cache->read("usermap_pinimgs");
-			
-			//Default pin
-			$default_pinimg = $pinimgs[$defaults['pinimg']];
-			
-			//Selected
-			$selected_pinimg[$mybb->input['pinimg']] = " selected=\"selected\"";
-			
-			foreach($pinimgs as $pid => $pinimg)
-			{
-				$file = explode(".", $pinimg['file']);
-				
-				eval("\$usermap_pinimgs_bit .= \"".$templates->get("usermap_pinimgs_bit")."\";");
-				eval("\$usermap_pinimgs_java_bit .= \"".$templates->get("usermap_pinimgs_java_bit")."\";");
-			}
-			
-			//Java
-			eval("\$usermap_pinimgs_swapimg = \"".$templates->get("usermap_pinimgs_swapimg")."\";");
-			eval("\$usermap_pinimgs_java = \"".$templates->get("usermap_pinimgs_java")."\";");
-			
-			/***********************************
 			 *   Pin
 			 ***********************************/
-			//Pinimg
-			$file = explode(".", $mybb->input['pinimg']);
-			$userpin['pinimg'] = $file[0];
-			
 			//Username
 			$username = build_profile_link(format_name($mybb->user['username'], $mybb->user['usergroup'], $mybb->user['displaygroup']), $mybb->user['uid']);
 			
@@ -300,6 +239,7 @@ switch($mybb->input['action'])
 			
 			//Templates
 			eval("\$userpin['window'] = \"".$templates->get("usermap_pins_bit_user", 1, 0)."\";");
+			// TODO: Equivalent to the note on the main page
 			$userpin['window'] = str_replace("\"", "'", $userpin['window']);
 			$userpin['window'] = str_replace("\n", "", $userpin['window']);
 			eval("\$usermap_pins_bit .= \"".$templates->get("usermap_pins_bit")."\";");
@@ -316,7 +256,7 @@ switch($mybb->input['action'])
 			error_no_permission();
 		}
 		
-		if(!floatval($mybb->input['lat']) || !floatval($mybb->input['lon']) || !isset($mybb->input['pinimg']) || !isset($mybb->input['adress']))
+		if(!floatval($mybb->input['lat']) || !floatval($mybb->input['lon']))
 		{
 			error($lang->noinput, $lang->error);
 		}
@@ -324,9 +264,7 @@ switch($mybb->input['action'])
 		{
 			$pin = array(
 				'usermap_lat'		=> floatval($mybb->input['lat']),
-				'usermap_lon'		=> floatval($mybb->input['lon']),
-				'usermap_pinimg'	=> addslashes($mybb->input['pinimg']),
-				'usermap_adress'	=> addslashes($mybb->input['adress'])
+				'usermap_lon'		=> floatval($mybb->input['lon'])
 			);
 			
 			$plugins->run_hooks("usermap_do_pin");
