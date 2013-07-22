@@ -73,7 +73,7 @@ function usermap_install()
 {
 	global $cache, $db;
 	
-	//Insert Usermap tables
+	// Insert Usermap places table
 	$db->write_query("CREATE TABLE `".TABLE_PREFIX."usermap_places` (
 	`pid` INT(5) NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(120) NOT NULL,
@@ -84,7 +84,7 @@ function usermap_install()
 	PRIMARY KEY (`pid`)
 	) TYPE=MyISAM".$db->build_create_table_collation().";");
 	
-	//Insert
+	// Insert default Usermap places
 	$place1 = array(
 		"name"		=> "World",
 		"lat"		=> "31.353637",
@@ -137,9 +137,6 @@ function usermap_install()
 		"zoom"		=> "3",
 		"displayorder"	=> "7"
 	);
-
-
-
 	
 	$db->insert_query("usermap_places", $place1);
 	$db->insert_query("usermap_places", $place2);
@@ -158,7 +155,7 @@ function usermap_install()
 	
 	$cache->update("usermap", $defaults);
 	
-	//Settings
+	// Insert the Usermap settings
 	$setting_group = array(
 		"name"			=> "usermap",
 		"title"			=> "Usermap Options",
@@ -203,7 +200,7 @@ function usermap_install()
 	
 	rebuild_settings();
 	
-	//Mybb-tables
+	// Alter MyBB tables
 	$db->write_query("ALTER TABLE `".TABLE_PREFIX."usergroups` ADD `canviewusermap` INT(1) NOT NULL DEFAULT '1',
 	ADD `canaddusermappin` INT(1) NOT NULL DEFAULT '1';");
 	
@@ -212,13 +209,13 @@ function usermap_install()
 	
 	$db->write_query("UPDATE ".TABLE_PREFIX."usergroups SET canviewusermap='0', canaddusermappin='0' WHERE gid='7'");
 	
-	//Update usergroupschache
+	// Update usergroupschache
 	$cache->update_usergroups();
 	
-	//Update adminpermissions
+	// Update adminpermissions
 	change_admin_permission("config", "usermap", 1);
 	
-	//Templates
+	// The Usermap templates to add
 	$templates['usermap'] = "<html>
 <head>
 <title>{\$mybb->settings['bbname']} - {\$lang->usermap}</title>
@@ -269,7 +266,6 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </body>
 </html>";
 	
-	// TODO: the pinimg part should be removed
 	$templates['usermap_form'] = "<form method=\"post\" action=\"usermap.php\">
 <input type=\"hidden\" name=\"action\" value=\"lookup\" />
 <tr>
@@ -352,7 +348,6 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 </body>
 </html>";
 	
-	// OK
 	$templates['usermap_pins'] = "<script type=\"text/javascript\">
 function setPins(map)
 {
@@ -368,13 +363,10 @@ function setPins(map)
 		new google.maps.InfoWindow({content: \"{\$window}\"}).open(map, marker{\$count});
 	});";
 	
-	// OK
 	$templates['usermap_pins_bit_user'] = "{\$username}{\$avatar}";
 	
-	// OK
 	$templates['usermap_places_bit'] = "<option value=\"{\$places['pid']}\"{\$selected_place[\$places['pid']]}>{\$places['name']}</option>";
 	
-	// OK?
 	$templates['usermap_places_java'] = "<script type=\"text/javascript\">
 function moveMap(country)
 {
@@ -385,7 +377,6 @@ function moveMap(country)
 }
 </script>";
 	
-	// OK
 	$templates['usermap_places_java_bit'] = "		case '{\$places['pid']}':
 			map.setCenter(new google.maps.LatLng({\$places['lat']}, {\$places['lon']}));
 			map.setZoom({\$places['zoom']});
@@ -410,23 +401,23 @@ function usermap_uninstall()
 {
 	global $db, $cache;
 	
-	//Delete Usermap tables
+	// Delete Usermap table
 	$db->write_query("DROP TABLE `".TABLE_PREFIX."usermap_places`;");
 	
-	//Delete datacache
+	// Delete Usermap datacache
 	$cache->update("usermap", false);
 	
-	//MyBB-tables
+	// Reverse chaneges to the MyBB tables
 	$db->write_query("ALTER TABLE `".TABLE_PREFIX."usergroups` DROP `canviewusermap`,
 	DROP `canaddusermappin`;");
 	
 	$db->write_query("ALTER TABLE `".TABLE_PREFIX."users` DROP `usermap_lat`,
 	DROP `usermap_lon`;");
 	
-	//Update usergroupschache
+	// Update usergroupschache
 	$cache->update_usergroups();
 	
-	//Delete MyBB settings
+	// Delete MyBB settings
 	$query = $db->query("SELECT * FROM ".TABLE_PREFIX."settinggroups WHERE name='usermap'");
 	$setting_group = $db->fetch_array($query);
 	
@@ -435,7 +426,7 @@ function usermap_uninstall()
 	
 	rebuild_settings();
 	
-	//Delete templates
+	// Delete templates
 	$deletetemplates = array('usermap', 'usermap_form', 'usermap_pin', 'usermap_pins', 'usermap_pins_bit', 'usermap_pins_bit_user', 'usermap_places_bit', 'usermap_places_java', 'usermap_places_java_bit');
 	
 	foreach($deletetemplates as $title)
@@ -446,7 +437,7 @@ function usermap_uninstall()
 
 function usermap_activate()
 {
-	//Update MyBB templates
+	// Update MyBB templates
 	require_once MYBB_ROOT."inc/adminfunctions_templates.php";
 
 	find_replace_templatesets("footer", "#".preg_quote("{\$lang->bottomlinks_syndication}</a>")."#", "{\$lang->bottomlinks_syndication}</a> | <a href=\"{\$mybb->settings['bburl']}/usermap.php\">{\$lang->usermap}</a>");
@@ -454,7 +445,7 @@ function usermap_activate()
 
 function usermap_deactivate()
 {
-	//Revert MyBB templates
+	// Revert MyBB templates
 	require_once MYBB_ROOT."inc/adminfunctions_templates.php";
 
 	find_replace_templatesets("footer", "#".preg_quote(" | <a href=\"{\$mybb->settings['bburl']}/usermap.php\">{\$lang->usermap}</a>")."#", "", 0);
@@ -481,7 +472,7 @@ function usermap_global()
 
 function usermap_online_activity($user_activity)
 {
-	//Get the filename
+	// Get the filename
 	$split_loc = explode(".php", $user_activity['location']);
 	$filename = my_substr($split_loc[0], -my_strpos(strrev($split_loc[0]), "/"));
 	
@@ -509,10 +500,10 @@ function usermap_admin_config_menu($sub_menu)
 {
 	global $lang;
 	
-	//Load the language files
+	// Load language files
 	$lang->load("config_usermap");
 	
-	//Add the menu item
+	// Add Usermap menu item
 	$sub_menu[] = array("id" => "usermap", "title" => $lang->usermap, "link" => "index.php?module=config/usermap");
 	
 	return $sub_menu;
@@ -529,10 +520,10 @@ function usermap_admin_config_permissions($admin_permissions)
 {
 	global $lang;
 	
-	//Load the language files
+	// Load language files
 	$lang->load("config_usermap");
 	
-	//Add the permission item
+	// Add item for Usermap permissions
 	$admin_permissions['usermap'] = $lang->can_manage_usermap;
 	
 	return $admin_permissions;
@@ -548,14 +539,14 @@ function usermap_admin_user_groups_edit()
 function usermap_admin_user_groups_edit_graph()
 {
 	global $form_container, $lang, $form, $mybb;
-	echo $form_container->_title;
-	//Check if it's the misc tab generating now
+	
+	// Check if it's the misc tab generating now
 	if($form_container->_title == $lang->misc)
 	{
-		//Load the language files
+		// Load language files
 		$lang->load("config_usermap");
 		
-		//Add the Usermap options
+		// Add Usermap permission options
 		$usermap_options = array(
 			$form->generate_check_box("canviewusermap", 1, $lang->can_view_usermap, array("checked" => $mybb->input['canviewusermap'])),
 			$form->generate_check_box("canaddusermappin", 1, $lang->can_add_usermap_pin, array("checked" => $mybb->input['canaddusermappin']))
