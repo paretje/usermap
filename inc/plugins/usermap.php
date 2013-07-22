@@ -6,7 +6,7 @@
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 12/06/2013 by Paretje
+ *   Last modified: 22/07/2013 by Paretje
  *
  ***************************************************************************/
 
@@ -72,7 +72,7 @@ function usermap_info()
 function usermap_install()
 {
 	global $cache, $db;
-	// TODO: Can we do it a bit more general?
+	
 	//Insert Usermap tables
 	$db->write_query("CREATE TABLE `".TABLE_PREFIX."usermap_places` (
 	`pid` INT(5) NOT NULL AUTO_INCREMENT,
@@ -94,22 +94,60 @@ function usermap_install()
 	);
 	$place2 = array(
 		"name"		=> "Europe",
-		"lat"		=> "49.439557",
-		"lon"		=> "11.513672",
-		"zoom"		=> "4",
+		"lat"		=> "54.5259614",
+		"lon"		=> "15.2551187",
+		"zoom"		=> "3",
 		"displayorder"	=> "2"
 	);
 	$place3 = array(
-		"name"		=> "USA",
-		"lat"		=> "37.0625",
-		"lon"		=> "-95.677068",
-		"zoom"		=> "4",
+		"name"		=> "North-America",
+		"lat"		=> "54.5259614",
+		"lon"		=> "-105.2551187",
+		"zoom"		=> "3",
 		"displayorder"	=> "3"
 	);
+	$place4 = array(
+		"name"		=> "Africa",
+		"lat"		=> "4.7408490",
+		"lon"		=> "22.8223210",
+		"zoom"		=> "3",
+		"displayorder"	=> "4"
+	);
+
+	$place5 = array(
+		"name"		=> "Asia",
+		"lat"		=> "48.9690913",
+		"lon"		=> "102.8831723",
+		"zoom"		=> "3",
+		"displayorder"	=> "5"
+	);
+
+	$place6 = array(
+		"name"		=> "Oceania",
+		"lat"		=> "-25.2743980",
+		"lon"		=> "133.7751360",
+		"zoom"		=> "3",
+		"displayorder"	=> "6"
+	);
+
+	$place7 = array(
+		"name"		=> "South-America",
+		"lat"		=> "-8.7831950",
+		"lon"		=> "-55.4914770",
+		"zoom"		=> "3",
+		"displayorder"	=> "7"
+	);
+
+
+
 	
 	$db->insert_query("usermap_places", $place1);
 	$db->insert_query("usermap_places", $place2);
 	$db->insert_query("usermap_places", $place3);
+	$db->insert_query("usermap_places", $place4);
+	$db->insert_query("usermap_places", $place5);
+	$db->insert_query("usermap_places", $place6);
+	$db->insert_query("usermap_places", $place7);
 	
 	// TODO: Can't this be added to the table?
 	//Insert datacache information
