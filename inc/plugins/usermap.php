@@ -177,13 +177,13 @@ function usermap_install()
 		"disporder"		=> "1",
 		"gid"			=> $gid
 	);
-	// TODO include the unit with the value, this makes it more flexible
+	
 	$setting2 = array(
 		"name"			=> "usermap_width",
 		"title"			=> "Map Width",
 		"description"		=> "The width of the map.",
 		"optionscode"		=> "text",
-		"value"			=> "750",
+		"value"			=> "750px",
 		"disporder"		=> "2",
 		"gid"			=> $gid
 	);
@@ -192,7 +192,7 @@ function usermap_install()
 		"title"			=> "Map Height",
 		"description"		=> "The height of the map.",
 		"optionscode"		=> "text",
-		"value"			=> "450",
+		"value"			=> "450px",
 		"disporder"		=> "3",
 		"gid"			=> $gid
 	);
@@ -261,7 +261,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </tr>
 <tr>
 <td colspan=\"2\" class=\"trow1\">
-<center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}px; height: {\$mybb->settings['usermap_height']}px\"></div></center>
+<center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}; height: {\$mybb->settings['usermap_height']}\"></div></center>
 </td>
 </tr>
 </table>
@@ -344,7 +344,7 @@ google.maps.event.addDomListener(window, 'load', initialize);</script>
 </tr>
 <tr>
 <td colspan=\"2\" class=\"trow1\">
-<center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}px; height: {\$mybb->settings['usermap_height']}px\"></div></center>
+<center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}; height: {\$mybb->settings['usermap_height']}\"></div></center>
 </td>
 </tr>
 </table>
