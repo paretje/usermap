@@ -2,11 +2,11 @@
 /***************************************************************************
  *
  *   Usermap-system for MyBB
- *   Copyright: © 2008-2013 Online - Urbanus
+ *   Copyright: © 2008-2014 Online - Urbanus
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 22/07/2013 by Paretje
+ *   Last modified: 03/01/2014 by Paretje
  *
  ***************************************************************************/
 
@@ -147,6 +147,7 @@ function usermap_install()
 	$db->insert_query("usermap_places", $place7);
 	
 	// TODO: Can't this be added to the table?
+	// 	 No, it should be a setting.
 	//Insert datacache information
 	//Default "settings"
 	$defaults = array(
