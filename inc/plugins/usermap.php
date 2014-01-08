@@ -2,11 +2,11 @@
 /***************************************************************************
  *
  *   Usermap-system for MyBB
- *   Copyright: © 2008-2013 Online - Urbanus
+ *   Copyright: © 2008-2014 Online - Urbanus
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 11/06/2013 by Paretje
+ *   Last modified: 04/01/2014 by Jockl
  *
  ***************************************************************************/
 
@@ -198,6 +198,18 @@ function usermap_install()
 <script type=\"text/javascript\">
 var map = true;
 </script>
+<script type=\"text/javascript\">
+<!--
+	var use_xmlhttprequest = \"{\$mybb->settings['use_xmlhttprequest']}\";
+	
+	function get_return(){
+		if(\$('username').value != '')
+		{
+			return '@[' +\$('username').value+ ']';
+		}
+	}
+// -->
+</script>
 {\$usermap_pinimgs_swapimg}
 {\$usermap_pinimgs_java}
 {\$usermap_pins}
@@ -232,6 +244,18 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </select>
 </td>
 </tr>
+<tr colspan=\"2\" class=\"trow1\">
+<form method=\"post\" action=\"usermap.php\">
+<input type=\"hidden\" name=\"action\" value=\"search\" />
+<td width=\"40%\">
+<strong>Search for User:</strong>
+</td>
+<td>
+<input type=\"text\" class=\"textbox\" name=\"username\" id=\"username\" style=\"width: 40%; margin-top: 10px;\" value=\"\" />
+<input type=\"submit\" class=\"submit\" value=\"Suche\" />
+</td>
+</form>
+</tr>
 <tr>
 <td colspan=\"2\" class=\"trow1\">
 <center><div id=\"map\" style=\"width: {\$mybb->settings['usermap_width']}px; height: {\$mybb->settings['usermap_height']}px\"></div></center>
@@ -239,6 +263,15 @@ google.maps.event.addDomListener(window, 'load', initialize);
 </tr>
 </table>
 {\$footer}
+<script type=\"text/javascript\" src=\"jscripts/autocomplete.js?ver=1400\"></script>
+<script type=\"text/javascript\">
+<!--
+	if(use_xmlhttprequest == \"1\")
+	{
+		new autoComplete(\"username\", \"xmlhttp.php?action=get_users\", {valueSpan: \"username\"});
+	}
+// -->
+</script>
 </body>
 </html>";
 	

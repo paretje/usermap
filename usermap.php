@@ -2,11 +2,11 @@
 /***************************************************************************
  *
  *   Usermap-system for MyBB
- *   Copyright: © 2008-2013 Online - Urbanus
+ *   Copyright: © 2008-2014 Online - Urbanus
  *   
  *   Website: http://www.Online-Urbanus.be
  *   
- *   Last modified: 11/06/2013 by Paretje
+ *   Last modified: 04/01/2013 by Jockl
  *
  ***************************************************************************/
 
@@ -336,5 +336,133 @@ switch($mybb->input['action'])
 			redirect("usermap.php", $lang->pinsaved);
 		}
 	break;
+  case 'search':
+		$defaults = $cache->read("usermap");
+		$selected_place[$defaults['place']] = " selected=\"selected\"";
+		
+    $username =  $mybb->input['username'];
+    
+    $check_input = $db->simple_select("users","uid", "username = '".$username."'");
+    $check_input = $db->fetch_array($check_input);
+    if(!$check_input['uid'] || $check_input['uid'] == 0){
+      redirect("usermap.php");
+      exit();
+    }
+    
+    $query = $db->query("SELECT * FROM ".TABLE_PREFIX."users WHERE username = '".$username."' AND usermap_lat!='0' AND usermap_lon!='0'");
+		$users = $db->fetch_array($query);
+
+		$query2 = $db->query("SELECT * FROM ".TABLE_PREFIX."usermap_places ORDER BY displayorder ASC");
+		while($places = $db->fetch_array($query2))
+		{
+			if($places['pid'] == $defaults['place'])
+			{
+				$default_place = array(
+					"lat"		=> $users['usermap_lat'],
+					"lon"		=> $users['usermap_lon'],
+					"zoom"		=> "10"
+				);
+			}
+			
+			eval("\$usermap_places_bit .= \"".$templates->get("usermap_places_bit")."\";");
+			eval("\$usermap_places_java_bit .= \"".$templates->get("usermap_places_java_bit")."\";");
+		}
+		
+		//Java
+		eval("\$usermap_places_java = \"".$templates->get("usermap_places_java")."\";");
+		
+		/***********************************
+		 *   Pinimages
+		 ***********************************/
+		$pinimgs = $cache->read("usermap_pinimgs");
+		
+		//Default pin
+		$file = explode(".", $pinimgs[$defaults['pinimg']]['file']);
+		$default_pinimg = $pinimgs[$defaults['pinimg']];
+		$default_pinimg['pin'] = $file[0];
+		
+		//Selected
+		$selected_pinimg[$default_pinimg['file']] = " selected=\"selected\"";
+		
+		foreach($pinimgs as $pid => $pinimg)
+		{
+			$file = explode(".", $pinimg['file']);
+			
+			eval("\$usermap_pinimgs_bit .= \"".$templates->get("usermap_pinimgs_bit")."\";");
+			eval("\$usermap_pinimgs_java_bit .= \"".$templates->get("usermap_pinimgs_java_bit")."\";");
+		}
+		
+		//Java
+		eval("\$usermap_pinimgs_swapimg = \"".$templates->get("usermap_pinimgs_swapimg")."\";");
+		eval("\$usermap_pinimgs_java = \"".$templates->get("usermap_pinimgs_java")."\";");
+
+    if($users['usermap_lat'] && $users['usermap_lon'])
+		{
+  			//Pinimg
+  			if(empty($users['usermap_pinimg']))
+  			{
+  				$users['usermap_pinimg'] = $default_pinimg['file'];
+  			}
+  			
+  			$file = explode(".", $users['usermap_pinimg']);
+  			$users['usermap_pinimg'] = $file[0];
+  			
+  			//Username
+  			$username = build_profile_link(format_name($users['username'], $users['usergroup'], $users['displaygroup']), $users['uid']);
+  			
+  			//Avatar
+  			if(!empty($users['avatar']))
+  			{
+  				$avatar = "<br /><img src=\"".$users['avatar']."\" alt=\"\" />";
+  			}
+  			else
+  			{
+  				$avatar = "";
+  			}
+  			
+  			//Plugin
+  			$plugins->run_hooks("username_default_while");
+  			
+  			eval("\$usermap_pins_bit_user = \"".$templates->get("usermap_pins_bit_user", 1, 0)."\";");
+  			$usermap_pins_bit_user = str_replace("\"", "'", $usermap_pins_bit_user);
+  			$usermap_pins_bit_user = str_replace("\n", "", $usermap_pins_bit_user);
+  			
+  			if(!is_array($userpins[$users['usermap_lat'].", ".$users['usermap_lon']]))
+  			{
+  				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['pinimg'] = $users['usermap_pinimg'];
+  				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['window'] = $usermap_pins_bit_user;
+  			}
+  			else
+  			{
+  				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['pinimg'] = $default_pinimg['pin'];
+  				$userpins[$users['usermap_lat'].", ".$users['usermap_lon']]['window'] .= "<br /><br />".$usermap_pins_bit_user;
+  			}
+  		
+    		if(is_array($userpins))
+    		{
+    			foreach($userpins as $coordinates => $userpin)
+    			{
+    				$count++;
+    				eval("\$usermap_pins_bit .= \"".$templates->get("usermap_pins_bit")."\";");
+    			}
+    		}
+  		
+		  eval("\$usermap_pins = \"".$templates->get("usermap_pins")."\";");
+
+  		//Form if logged in
+  		if($mybb->user['uid'] != 0 && $mybb->usergroup['canaddusermappin'] == 1)
+  		{
+  			eval("\$usermap_form = \"".$templates->get("usermap_form")."\";");
+  		}
+		
+  		eval("\$usermap = \"".$templates->get("usermap")."\";");
+  		output_page($usermap);
+    }
+    else
+    {
+      redirect("usermap.php?action=search&username=");
+      echo "Fehler";
+    }
+  break;
 }
 ?>
