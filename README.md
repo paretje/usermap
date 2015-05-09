@@ -1,4 +1,9 @@
+IMPORTANT NOTE
+==============
+This plugin is no longer maintained here or by Paretje. Starting from MyBB 1.8, development has been taken over by Jockl. It's new home is [mybb.de](https://www.mybb.de/erweiterungen/18x/plugins-neueseiten/usermap2).
+
 Usermap 1.2 beta
+================
 Online - Urbanus <info@Online-Urbanus.be>
 http://www.Online-Urbanus.be
 
